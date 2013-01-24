@@ -30,7 +30,7 @@
 
 typedef struct hulk_t {
 	bool (*recognize)(FILE*);
-	bool (*smash)(FILE*, const char*, FILE*, int);
+	bool (*smash)(FILE*, const char*, FILE*, bool);
 
 	void* private;
 } hulk_t;
@@ -43,4 +43,4 @@ hulk_t* hulk_recognize (FILE* disk);
 /***
  ** Destroy the file with the given content and the given times.
  */
-bool hulk_smash (hulk_t* hulk, FILE* disk, const char* file, FILE* with, int times);
+bool hulk_smash (hulk_t* hulk, FILE* disk, const char* file, FILE* with, bool only_date);

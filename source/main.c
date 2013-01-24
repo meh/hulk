@@ -36,9 +36,9 @@ hulk_recognize (FILE* disk)
 }
 
 bool
-hulk_smash (hulk_t* hulk, FILE* disk, const char* file, FILE* with, int times)
+hulk_smash (hulk_t* hulk, FILE* disk, const char* file, FILE* with, bool only_date)
 {
-	return hulk->smash(disk, file, with, times);
+	return hulk->smash(disk, file, with, only_date);
 }
 
 typedef struct mount_t {
@@ -149,8 +149,9 @@ usage (void)
 	fprintf(stderr,
 		"Usage: hulk [OPTION]... FILE...\n"
 		"\n"
-		"  -w, --with       what to get the data from to smash with\n"
-		"  -d, --device     the device where the files are (can be a simple file)\n");
+		"  -i, --input      what to get the data from to smash with\n"
+		"  -o, --output     the device where the files are (can be a simple file)\n"
+		"  -d, --date       scramble only the date\n");
 
 	exit(EXIT_FAILURE);
 }
@@ -160,33 +161,34 @@ main (int argc, char* argv[])
 {
 	const char* with_path   = "/dev/zero";
 	const char* device_path = NULL;
-	      int   times       = 1;
+	      int   only_date   = false;
 
 	while (true) {
-		static struct option options[] = {
-			{"with",   required_argument, 0, 'w'},
-			{"device", required_argument, 0, 'd'},
-			{"times",  required_argument, 0, 't'}
+		struct option options[] = {
+			{"date",   no_argument,       &only_date,  1 },
+
+			{"input",  required_argument, NULL,       'i'},
+			{"output", required_argument, NULL,       'o'},
 		};
 
 		int index = 0;
-		int c     = getopt_long(argc, argv, "w:d:t", options, &index);
+		int c     = getopt_long(argc, argv, "i:o:d", options, &index);
 
 		if (c == -1) {
 			break;
 		}
 
 		switch (c) {
-			case 'w':
+			case 'i':
 				with_path = optarg;
 				break;
 
-			case 'd':
+			case 'o':
 				device_path = optarg;
 				break;
 
-			case 't':
-				times = atoi(optarg);
+			case 'd':
+				only_date = true;
 				break;
 
 			default:
@@ -220,7 +222,7 @@ main (int argc, char* argv[])
 				fprintf(stderr, "%s (%s): Hulk cannot smash that, is that adamantium or something?\n", file, device);
 			}
 			else {
-				if (!hulk_smash(hulk, disk, file, with, times)) {
+				if (!hulk_smash(hulk, disk, file, with, only_date)) {
 					fprintf(stderr, "%s (%s): Hulk cannot pick that up, I guess it was Thor's hammer!\n", file, device);
 				}
 			}

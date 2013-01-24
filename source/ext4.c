@@ -27,7 +27,7 @@ recognize (FILE* disk)
 
 static
 bool
-smash (FILE* disk, const char* path, FILE* with, int times)
+smash (FILE* disk, const char* path, FILE* with, bool only_date)
 {
 	return false;
 }
