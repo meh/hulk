@@ -16,31 +16,25 @@
  * along with hulk. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _FILE_OFFSET_BITS 64
-#define _LARGEFILE_SOURCE
-#define _LARGEFILE64_SOURCE
+#include <hulk.h>
 
-#define _GNU_SOURCE
+static
+bool
+recognize (FILE* disk)
+{
+	return false;
+}
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+static
+bool
+smash (FILE* disk, const char* path, FILE* with, int times)
+{
+	return false;
+}
 
-typedef struct hulk_t {
-	bool (*recognize)(FILE*);
-	bool (*smash)(FILE*, const char*, FILE*, int);
+hulk_t ext4 = {
+	.recognize = recognize,
+	.smash     = smash,
 
-	void* private;
-} hulk_t;
-
-/***
- ** Recognize the file system and get the proper Hulk.
- */
-hulk_t* hulk_recognize (FILE* disk);
-
-/***
- ** Destroy the file with the given content and the given times.
- */
-bool hulk_smash (hulk_t* hulk, FILE* disk, const char* file, FILE* with, int times);
+	.private = NULL
+};
