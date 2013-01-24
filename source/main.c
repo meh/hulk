@@ -52,13 +52,31 @@ typedef struct mount_t {
 } mount_t;
 
 static
+mount_t*
+new_mount (void)
+{
+	return memset(malloc(sizeof(mount_t)), 0, sizeof(mount_t));
+}
+
+static
 void
 destroy_mount (mount_t* self)
 {
-	free(self->device);
-	free(self->point);
-	free(self->type);
-	free(self->options);
+	if (self->device) {
+		free(self->device);
+	}
+	
+	if (self->point) {
+		free(self->point);
+	}
+
+	if (self->type) {
+		free(self->type);
+	}
+
+	if (self->options) {
+		free(self->options);
+	}
 
 	free(self);
 }
@@ -67,10 +85,10 @@ static
 mount_t*
 next_mount (FILE* file)
 {
-	mount_t* mount = malloc(sizeof(mount_t));
+	mount_t* mount = new_mount();
 
 	if (fscanf(file, "%as %as %as %as %d %d\n", &mount->device, &mount->point, &mount->type, &mount->options, &mount->passes, &mount->order) == EOF) {
-		free(mount);
+		destroy_mount(mount);
 
 		return NULL;
 	}
