@@ -30,20 +30,30 @@ hulk_t*
 hulk_recognize (FILE* output)
 {
 	static hulk_t* hulks[] = { &ext4 };
+	       hulk_t* result  = NULL;
 
-	for (int i = 0; i < sizeof(hulks) / sizeof(hulk_t*); i++) {
+	for (int i = 0; !result && i < sizeof(hulks) / sizeof(hulk_t*); i++) {
+		off_t beginning = ftello(output);
+
 		if (hulks[i]->recognize(output)) {
-			return hulks[i];
+			result = hulks[i];
 		}
+
+		fseeko(output, beginning, SEEK_SET);
 	}
 
-	return NULL;
+	return result;
 }
 
 bool
 hulk_smash (hulk_t* hulk, FILE* output, FILE* input, const char* path, bool only_date)
 {
-	return hulk->smash(output, input, path, only_date);
+	off_t beginning = ftello(output);
+	bool  result    = hulk->smash(output, input, path, only_date);
+
+	fseeko(output, beginning, SEEK_SET);
+
+	return result;
 }
 
 void
