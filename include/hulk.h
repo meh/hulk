@@ -22,6 +22,11 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <limits.h>
+
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#	error "HULK NO LIKE BIG ENDIANS"
+#endif
 
 typedef struct hulk_t {
 	bool (*recognize)(FILE*);
