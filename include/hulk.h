@@ -28,7 +28,9 @@
 #	error "HULK NO LIKE BIG ENDIANS"
 #endif
 
-typedef struct hulk_t {
+typedef
+struct hulk_t
+{
 	bool (*recognize)(FILE*);
 	bool (*smash)(FILE*, FILE*, const char*, bool);
 
