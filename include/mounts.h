@@ -16,32 +16,20 @@
  * along with hulk. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _FILE_OFFSET_BITS 64
-#define _LARGEFILE_SOURCE
-#define _LARGEFILE64_SOURCE
-
 #include <stdio.h>
-#include <stdbool.h>
 
-typedef struct hulk_t {
-	bool (*recognize)(FILE*);
-	bool (*smash)(FILE*, FILE*, const char*, bool);
+typedef struct mount_t {
+	char* device;
+	char* point;
+	char* type;
+	char* options;
 
-	void* private;
-} hulk_t;
+	int passes;
+	int order;
+} mount_t;
 
-/***
- ** Recognize the file system and get the proper Hulk.
- */
-hulk_t* hulk_recognize (FILE* output);
+mount_t* new_mount (void);
 
-/***
- ** Destroy the file with the given content and the given times.
- */
-bool hulk_smash (hulk_t* hulk, FILE* output, FILE* input, const char* path, bool only_date);
+void destroy_mount (mount_t* self);
 
-/***
- ** Write to output the amount read from input, if input ends, it seeks to the beginning
- ** and continues.
- */
-void hulk_write (FILE* output, FILE* input, size_t size);
+mount_t* next_mount (FILE* mounts);

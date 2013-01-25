@@ -2,7 +2,7 @@ require 'rake'
 require 'rake/clean'
 
 CC      = 'clang'
-CFLAGS  = "-Wall -Werror-implicit-function-declaration -Wno-format -std=c11 -Iinclude #{ENV['CFLAGS']}"
+CFLAGS  = "-Wall -Werror-implicit-function-declaration -Wno-format -std=gnu11 -Iinclude #{ENV['CFLAGS']}"
 LDFLAGS = "#{ENV['LDFLAGS']}"
 
 SOURCES = FileList['source/**/*.c']

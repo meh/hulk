@@ -20,21 +20,19 @@
 
 static
 bool
-recognize (FILE* disk)
+recognize (FILE* output)
 {
 	return false;
 }
 
 static
 bool
-smash (FILE* disk, const char* path, FILE* with, bool only_date)
+smash (FILE* output, FILE* input, const char* path, bool only_date)
 {
 	return false;
 }
 
 hulk_t ext4 = {
 	.recognize = recognize,
-	.smash     = smash,
-
-	.private = NULL
+	.smash     = smash
 };

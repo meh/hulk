@@ -16,32 +16,49 @@
  * along with hulk. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _FILE_OFFSET_BITS 64
-#define _LARGEFILE_SOURCE
-#define _LARGEFILE64_SOURCE
+#include <mounts.h>
 
-#include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
-typedef struct hulk_t {
-	bool (*recognize)(FILE*);
-	bool (*smash)(FILE*, FILE*, const char*, bool);
+mount_t*
+new_mount (void)
+{
+	return memset(malloc(sizeof(mount_t)), 0, sizeof(mount_t));
+}
 
-	void* private;
-} hulk_t;
+void
+destroy_mount (mount_t* self)
+{
+	if (self->device) {
+		free(self->device);
+	}
+	
+	if (self->point) {
+		free(self->point);
+	}
 
-/***
- ** Recognize the file system and get the proper Hulk.
- */
-hulk_t* hulk_recognize (FILE* output);
+	if (self->type) {
+		free(self->type);
+	}
 
-/***
- ** Destroy the file with the given content and the given times.
- */
-bool hulk_smash (hulk_t* hulk, FILE* output, FILE* input, const char* path, bool only_date);
+	if (self->options) {
+		free(self->options);
+	}
 
-/***
- ** Write to output the amount read from input, if input ends, it seeks to the beginning
- ** and continues.
- */
-void hulk_write (FILE* output, FILE* input, size_t size);
+	free(self);
+}
+
+mount_t*
+next_mount (FILE* mounts)
+{
+	mount_t* mount = new_mount();
+
+	if (fscanf(mounts, "%as %as %as %as %d %d\n", &mount->device, &mount->point, &mount->type, &mount->options, &mount->passes, &mount->order) == EOF) {
+		destroy_mount(mount);
+
+		return NULL;
+	}
+
+	return mount;
+}
