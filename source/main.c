@@ -143,12 +143,17 @@ usage (void)
 	fprintf(stderr,
 		"Usage: hulk [OPTION]... FILE...\n"
 		"\n"
+		"  -h, --help       show this help\n"
+		"\n"
 		"  -w, --with       what to get the data from to smash with\n"
 		"  -d, --device     the device where the files are (can be a simple file)\n"
-
+		"\n"
 		"  -V, --verbose    print verbose errors\n"
 		"  -D, --date-only  scramble only the date\n"
-		"  -R, --remove     remove the file too\n");
+		"  -R, --remove     remove the file too\n"
+		"\n"
+		"WARNING: remember you're asking Hulk to smash a little fly in a glass shop, if "
+		"the Hulk destroys everything, it's not my fault.\n");
 
 	exit(EXIT_FAILURE);
 }
@@ -162,12 +167,16 @@ main (int argc, char* argv[])
 
 	while (true) {
 		struct option options[] = {
+			{"help", no_argument, NULL, 'h'},
+
 			{"with",   required_argument, NULL, 'i'},
 			{"device", required_argument, NULL, 'o'},
 
 			{"verbose",   no_argument, NULL, 'V' },
 			{"date-only", no_argument, NULL, 'D' },
-			{"remove",    no_argument, NULL, 'R' }
+			{"remove",    no_argument, NULL, 'R' },
+
+			{NULL}
 		};
 
 		int index = 0;
