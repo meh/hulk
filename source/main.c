@@ -8,12 +8,12 @@
  * (at your option) any later version.
  *
  * hulk is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; inputout even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along input hulk. If not, see <http://www.gnu.org/licenses/>.
+ * along with hulk. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <hulk.h>
@@ -27,37 +27,37 @@
 extern hulk_t ext4;
 
 hulk_t*
-hulk_recognize (FILE* output)
+hulk_recognize (FILE* device)
 {
 	static hulk_t* hulks[] = { &ext4 };
 	       hulk_t* result  = NULL;
 
 	for (int i = 0; !result && i < sizeof(hulks) / sizeof(hulk_t*); i++) {
-		off_t beginning = ftello(output);
+		off_t beginning = ftello(device);
 
-		if (hulks[i]->recognize(output)) {
+		if (hulks[i]->recognize(device)) {
 			result = hulks[i];
 		}
 
-		fseeko(output, beginning, SEEK_SET);
+		fseeko(device, beginning, SEEK_SET);
 	}
 
 	return result;
 }
 
 bool
-hulk_smash (hulk_t* hulk, FILE* output, FILE* input, const char* path, bool only_date)
+hulk_smash (hulk_t* hulk, FILE* device, FILE* with, const char* path, hulk_flags_t mode)
 {
-	off_t beginning = ftello(output);
-	bool  result    = hulk->smash(output, input, path, only_date);
+	off_t beginning = ftello(device);
+	bool  result    = hulk->smash(device, with, path, mode);
 
-	fseeko(output, beginning, SEEK_SET);
+	fseeko(device, beginning, SEEK_SET);
 
 	return result;
 }
 
 void
-hulk_write (FILE* output, FILE* input, size_t size)
+hulk_write (FILE* device, FILE* with, size_t size)
 {
 	size_t current = 0;
 	size_t fill    = 0;
@@ -65,23 +65,23 @@ hulk_write (FILE* output, FILE* input, size_t size)
 
 	while (current < size) {
 		while (fill < 512) {
-			size_t read = fread(buffer + fill, 1, 512 - fill, input);
+			size_t read = fread(buffer + fill, 1, 512 - fill, with);
 
 			if (read < 512) {
-				fseek(input, 0, SEEK_SET);
+				fseek(with, 0, SEEK_SET);
 			}
 
 			fill += read;
 		}
 
 		if (size - current < 512) {
-			size_t written = fwrite(buffer, 1, size - current, output);
+			size_t written = fwrite(buffer, 1, size - current, device);
 
 			current += written;
 		}
 		else {
 			while (fill > 0 && current < size) {
-				size_t written = fwrite(buffer + (512 - fill), 1, fill, output);
+				size_t written = fwrite(buffer + (512 - fill), 1, fill, device);
 
 				current += written;
 				fill    -= written;
@@ -143,9 +143,9 @@ usage (void)
 	fprintf(stderr,
 		"Usage: hulk [OPTION]... FILE...\n"
 		"\n"
-		"  -i, --input      what to get the data from to smash input\n"
-		"  -o, --output     the device where the files are (can be a simple file)\n"
-		"  -d, --date       scramble only the date\n");
+		"  -w, --with       what to get the data from to smash with\n"
+		"  -d, --device     the device where the files are (can be a simple file)\n"
+		"  -D, --date-only  scramble only the date\n");
 
 	exit(EXIT_FAILURE);
 }
@@ -153,20 +153,21 @@ usage (void)
 int
 main (int argc, char* argv[])
 {
-	const char* input_path  = "/dev/zero";
-	const char* device_path = NULL;
-	      int   only_date   = false;
+	const char*        with_path   = "/dev/zero";
+	const char*        device_path = NULL;
+	      hulk_flags_t mode        = 0;
 
 	while (true) {
 		struct option options[] = {
-			{"date",   no_argument,       &only_date,  1 },
+			{"with",   required_argument, NULL, 'i'},
+			{"device", required_argument, NULL, 'o'},
 
-			{"input",  required_argument, NULL,       'i'},
-			{"output", required_argument, NULL,       'o'},
+			{"date-only", no_argument, NULL, 'D' },
+			{"remove",    no_argument, NULL, 'R' }
 		};
 
 		int index = 0;
-		int c     = getopt_long(argc, argv, "i:o:d", options, &index);
+		int c     = getopt_long(argc, argv, "i:o:DR", options, &index);
 
 		if (c == -1) {
 			break;
@@ -174,16 +175,19 @@ main (int argc, char* argv[])
 
 		switch (c) {
 			case 'i':
-				input_path = optarg;
+				with_path = optarg;
 				break;
 
 			case 'o':
 				device_path = optarg;
 				break;
 
-			case 'd':
-				only_date = true;
+			case 'D':
+				mode |= HULK_ONLY_DATE;
 				break;
+
+			case 'R':
+				mode |= HULK_REMOVE;
 
 			default:
 				usage();
@@ -194,52 +198,52 @@ main (int argc, char* argv[])
 		usage();
 	}
 
-	FILE* input = fopen(input_path, "r");
-	if (input) {
-		if (fgetc(input) != EOF) {
-			fseek(input, -1, SEEK_CUR);
+	FILE* with = fopen(with_path, "r");
+	if (with) {
+		if (fgetc(with) != EOF) {
+			fseek(with, -1, SEEK_CUR);
 		}
 		else {
-			fprintf(stderr, "%s: Hulk cannot use!\n", input_path);
+			fprintf(stderr, "%s: Hulk cannot use!\n", with_path);
 
 			return EXIT_FAILURE;
 		}
 	}
 	else {
-		fprintf(stderr, "%s: Hulk cannot use!\n", input_path);
+		fprintf(stderr, "%s: Hulk cannot use!\n", with_path);
 
 		return EXIT_FAILURE;
 	}
 
 	for (int i = optind; i < argc; i++) {
-		char* path   = device_path ? strdup(argv[i])     : path_for(argv[i]);
-		char* device = device_path ? strdup(device_path) : device_for(argv[i]);
+		char* file_path = device_path ? strdup(argv[i])     : path_for(argv[i]);
+		char* disk_path = device_path ? strdup(device_path) : device_for(argv[i]);
 
-		FILE* output = fopen(device, "r+");
+		FILE* disk = fopen(disk_path, "r+");
 
-		if (output) {
-			hulk_t* hulk = hulk_recognize(output);
+		if (disk) {
+			hulk_t* hulk = hulk_recognize(disk);
 
 			if (!hulk) {
-				fprintf(stderr, "%s (%s): Hulk cannot smash that, is that adamantium or something?\n", path, device);
+				fprintf(stderr, "%s (%s): Hulk cannot smash that, is that adamantium or something?\n", file_path, disk_path);
 			}
 			else {
-				if (!hulk_smash(hulk, output, input, path, only_date)) {
-					fprintf(stderr, "%s (%s): Hulk cannot pick that up, I guess it was Thor's hammer!\n", path, device);
+				if (!hulk_smash(hulk, disk, with, file_path, mode)) {
+					fprintf(stderr, "%s (%s): Hulk cannot pick that up, I guess it was Thor's hammer!\n", file_path, disk_path);
 				}
 			}
 
-			fclose(output);
+			fclose(disk);
 		}
 		else {
-			fprintf(stderr, "%s: Hulk cannot touch!\n", device);
+			fprintf(stderr, "%s: Hulk cannot touch!\n", disk_path);
 		}
 
-		free(device);
-		free(path);
+		free(disk_path);
+		free(file_path);
 	}
 
-	fclose(input);
+	fclose(with);
 
 	return EXIT_SUCCESS;
 }

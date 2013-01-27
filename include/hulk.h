@@ -28,11 +28,16 @@
 #	error "HULK NO LIKE BIG ENDIANS"
 #endif
 
+typedef int hulk_flags_t;
+
+#define HULK_ONLY_DATE 0x1
+#define HULK_REMOVE    0x2
+
 typedef
 struct hulk_t
 {
 	bool (*recognize)(FILE*);
-	bool (*smash)(FILE*, FILE*, const char*, bool);
+	bool (*smash)(FILE*, FILE*, const char*, hulk_flags_t);
 
 	void* private;
 } hulk_t;
@@ -40,15 +45,15 @@ struct hulk_t
 /***
  ** Recognize the file system and get the proper Hulk.
  */
-hulk_t* hulk_recognize (FILE* output);
+hulk_t* hulk_recognize (FILE* device);
 
 /***
  ** Destroy the file with the given content and the given times.
  */
-bool hulk_smash (hulk_t* hulk, FILE* output, FILE* input, const char* path, bool only_date);
+bool hulk_smash (hulk_t* hulk, FILE* device, FILE* with, const char* path, hulk_flags_t mode);
 
 /***
- ** Write to output the amount read from input, if input ends, it seeks to the beginning
+ ** Write to device the amount read from with, if with ends, it seeks to the beginning
  ** and continues.
  */
-void hulk_write (FILE* output, FILE* input, size_t size);
+void hulk_write (FILE* device, FILE* with, size_t size);

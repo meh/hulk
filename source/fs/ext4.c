@@ -73,7 +73,7 @@ recognize (FILE* output)
 
 static
 bool
-smash (FILE* output, FILE* input, const char* path, bool only_date)
+smash (FILE* disk, FILE* with, const char* path, hulk_flags_t mode)
 {
 	return false;
 }
