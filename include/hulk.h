@@ -30,8 +30,9 @@
 
 typedef int hulk_flags_t;
 
-#define HULK_ONLY_DATE 0x1
-#define HULK_REMOVE    0x2
+#define HULK_VERBOSE   0x1
+#define HULK_ONLY_DATE 0x2
+#define HULK_REMOVE    0x4
 
 typedef
 struct hulk_t

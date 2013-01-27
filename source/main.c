@@ -145,7 +145,10 @@ usage (void)
 		"\n"
 		"  -w, --with       what to get the data from to smash with\n"
 		"  -d, --device     the device where the files are (can be a simple file)\n"
-		"  -D, --date-only  scramble only the date\n");
+
+		"  -V, --verbose    print verbose errors\n"
+		"  -D, --date-only  scramble only the date\n"
+		"  -R, --remove     remove the file too\n");
 
 	exit(EXIT_FAILURE);
 }
@@ -162,12 +165,13 @@ main (int argc, char* argv[])
 			{"with",   required_argument, NULL, 'i'},
 			{"device", required_argument, NULL, 'o'},
 
+			{"verbose",   no_argument, NULL, 'V' },
 			{"date-only", no_argument, NULL, 'D' },
 			{"remove",    no_argument, NULL, 'R' }
 		};
 
 		int index = 0;
-		int c     = getopt_long(argc, argv, "i:o:DR", options, &index);
+		int c     = getopt_long(argc, argv, "i:o:VDR", options, &index);
 
 		if (c == -1) {
 			break;
@@ -182,12 +186,17 @@ main (int argc, char* argv[])
 				device_path = optarg;
 				break;
 
+			case 'V':
+				mode |= HULK_VERBOSE;
+				break;
+
 			case 'D':
 				mode |= HULK_ONLY_DATE;
 				break;
 
 			case 'R':
 				mode |= HULK_REMOVE;
+				break;
 
 			default:
 				usage();
