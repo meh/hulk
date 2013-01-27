@@ -24,11 +24,11 @@
 #include <string.h>
 #include <getopt.h>
 
-extern hulk_t ext4;
-
 hulk_t*
 hulk_recognize (FILE* device)
 {
+	extern hulk_t ext4;
+
 	static hulk_t* hulks[] = { &ext4 };
 	       hulk_t* result  = NULL;
 
