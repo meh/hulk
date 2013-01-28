@@ -33,13 +33,11 @@ hulk_recognize (FILE* device)
 	       hulk_t* result  = NULL;
 
 	for (int i = 0; !result && i < sizeof(hulks) / sizeof(hulk_t*); i++) {
-		off_t beginning = ftello(device);
-
 		if (hulks[i]->recognize(device)) {
 			result = hulks[i];
 		}
 
-		fseeko(device, beginning, SEEK_SET);
+		fseeko(device, 0, SEEK_SET);
 	}
 
 	return result;
@@ -48,10 +46,9 @@ hulk_recognize (FILE* device)
 bool
 hulk_smash (hulk_t* hulk, FILE* device, FILE* with, const char* path, hulk_flags_t mode)
 {
-	off_t beginning = ftello(device);
-	bool  result    = hulk->smash(device, with, path, mode);
+	bool  result = hulk->smash(device, with, path, mode);
 
-	fseeko(device, beginning, SEEK_SET);
+	fseeko(device, 0, SEEK_SET);
 
 	return result;
 }

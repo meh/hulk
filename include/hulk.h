@@ -39,8 +39,6 @@ struct hulk_t
 {
 	bool (*recognize)(FILE*);
 	bool (*smash)(FILE*, FILE*, const char*, hulk_flags_t);
-
-	void* private;
 } hulk_t;
 
 /***
