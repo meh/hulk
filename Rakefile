@@ -17,10 +17,14 @@ file 'hulk' => OBJECTS do
 	sh "#{CC} -o hulk #{OBJECTS} #{LDFLAGS}"
 end
 
-task :image do
+task :image, :format do |t, args|
+	unless args[:format]
+		raise ArgumentError, "you have to pass a format"
+	end
+
 	sh 'mkdir -p test'
 	sh 'dd if=/dev/zero of=test.img bs=1048576 count=10'
-	sh 'mkfs.ext4 -F test.img'
+	sh "mkfs.#{args[:format]} -F test.img"
 	sh 'sudo mount -o loop test.img test'
 	sh 'dd if=/dev/urandom of=test/a bs=1048576 count=1'
 	sh 'dd if=/dev/urandom of=test/b bs=1048576 count=3'
