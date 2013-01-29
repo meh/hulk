@@ -243,6 +243,10 @@ main (int argc, char* argv[])
 				fprintf(stderr, "%s (%s): Hulk cannot smash that, is that adamantium or something?\n", file_path, disk_path);
 			}
 			else {
+				if (mode & HULK_VERBOSE) {
+					fprintf(stderr, "hulk:%s: ready to smash %s (%s)\n", hulk->name, file_path, disk_path);
+				}
+
 				if (!hulk_smash(hulk, disk, with, file_path, mode)) {
 					fprintf(stderr, "%s (%s): Hulk cannot pick that up, I guess it was Thor's hammer!\n", file_path, disk_path);
 				}

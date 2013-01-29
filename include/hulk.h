@@ -37,6 +37,8 @@ typedef int hulk_flags_t;
 typedef
 struct hulk_t
 {
+	const char* name;
+
 	bool (*recognize)(FILE*);
 	bool (*smash)(FILE*, FILE*, const char*, hulk_flags_t);
 } hulk_t;
