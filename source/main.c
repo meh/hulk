@@ -28,29 +28,29 @@ hulk_t*
 hulk_recognize (FILE* device)
 {
 	extern hulk_t ext4;
+	extern hulk_t ext3;
+	extern hulk_t ext2;
 
-	static hulk_t* hulks[] = { &ext4 };
-	       hulk_t* result  = NULL;
+	// the order here is important
+	static hulk_t* hulks[] = { &ext2, &ext3, &ext4 };
 
-	for (int i = 0; !result && i < sizeof(hulks) / sizeof(hulk_t*); i++) {
-		if (hulks[i]->recognize(device)) {
-			result = hulks[i];
-		}
-
+	for (int i = 0; i < sizeof(hulks) / sizeof(hulk_t*); i++) {
 		fseeko(device, 0, SEEK_SET);
+
+		if (hulks[i]->recognize(device)) {
+			return hulks[i];
+		}
 	}
 
-	return result;
+	return NULL;
 }
 
 bool
 hulk_smash (hulk_t* hulk, FILE* device, FILE* with, const char* path, hulk_flags_t mode)
 {
-	bool  result = hulk->smash(device, with, path, mode);
-
 	fseeko(device, 0, SEEK_SET);
 
-	return result;
+	return hulk->smash(device, with, path, mode);
 }
 
 void
@@ -65,7 +65,7 @@ hulk_write (FILE* device, FILE* with, size_t size)
 			size_t read = fread(buffer + fill, 1, 512 - fill, with);
 
 			if (read < 512) {
-				fseek(with, 0, SEEK_SET);
+				fseeko(with, 0, SEEK_SET);
 			}
 
 			fill += read;
@@ -216,7 +216,7 @@ main (int argc, char* argv[])
 	FILE* with = fopen(with_path, "r");
 	if (with) {
 		if (fgetc(with) != EOF) {
-			fseek(with, -1, SEEK_CUR);
+			fseeko(with, -1, SEEK_CUR);
 		}
 		else {
 			fprintf(stderr, "%s: Hulk cannot use!\n", with_path);
